@@ -3,6 +3,7 @@ import { useState } from "react";
 import RolesTab from "@/components/admin/RolesTab";
 import LookupValuesTab from "@/components/admin/LookupValuesTab";
 import Sidebar from "@/components/sidebar/sidebar";
+import PositionsTab from "@/components/admin/PositionsTab";
 
 const TABS = [ "Master Data", "Roles", "Positions"];
 
@@ -35,6 +36,7 @@ export default function AdminSettings(){
 
                 {activeTab === "Roles" && <RolesTab />}
                 {activeTab === "Master Data" && <LookupValuesTab />}
+                {activeTab === "Positions" && <PositionsTab />}
 
             </div>
         </div>

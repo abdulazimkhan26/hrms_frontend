@@ -1,312 +1,250 @@
-"use client";
-import { useContext, useEffect, useState } from "react";
-import EntityModal from "./EntityModal";
-import { toast } from "sonner";
-import { useAuthGuard } from '@/hooks/useAuthGuard';
+// "use client";
+// import { useEffect, useReducer, useState } from "react";
+// import EntityModal from "./EntityModal";
+// import { toast } from "sonner";
+// import { useAuthGuard } from '@/hooks/useAuthGuard';
 
-const API = "http://localhost:8080";
+// const API = "http://localhost:8080";
 
-const FIELDS = [
-  { name: "name", label: "Role name", required: true },
-  { name: "description", label: "Description", required: false },
-];
+// const POSITIONS_FIELDS = [
+//   { name: "code", label: "Code", required: true },
+//   { name: "label", label: "Label", required: true },
+//   { name: "description", label: "Description", required: true },
+// ];
 
-export default function PositionsTabs() {
-  const {isAuth,token} = useAuthGuard();
+// // ── Reusable table section component ──────────────
+// function DataTable({ columns, rows, selected, onRowClick, search, onSearch, onAdd, addLabel, loading, deleteConfirm, onEdit, onDeleteRequest, onDeleteConfirm, onDeleteCancel }: any) {
+//   return (
+//     <div className="w-1/2">
+//       <div className="flex justify-between items-center mb-4">
+//         <input
+//           placeholder={`Search...`}
+//           value={search}
+//           onChange={(e) => onSearch(e.target.value)}
+//           className="px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 w-48 focus:outline-none focus:ring-1 focus:ring-gray-400"
+//         />
+//         <button
+//           onClick={onAdd}
+//           disabled={!onAdd}
+//           className="px-4 py-2 text-sm font-medium bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed"
+//         >
+//           {addLabel}
+//         </button>
+//       </div>
 
-  const [roles, setRoles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
-  const [modal, setModal] = useState<"add" | "edit" | null>(null);
-  const [selected, setSelected] = useState<any | null>(null);
-  const [form, setForm] = useState<Record<string, string>>({});
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+//       {loading ? (
+//         <div className="p-4 text-gray-500">Loading...</div>
+//       ) : (        
+//         <div className="border border-gray-200 rounded-xl overflow-hidden">
+//           <table className="w-full text-sm">
+//             <thead className="bg-gray-50">
+//               <tr>
+//                 {columns.map((col: string) => (
+//                   <th key={col} className="text-left px-4 py-3 text-m text-black font-bold uppercase">{col}</th>
+//                 ))}
+//                 <th className="text-left px-4 py-3 text-m font-bold text-black uppercase">Actions</th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               {rows.length === 0 ? (
+//                 <tr><td colSpan={columns.length + 1} className="px-4 py-8 text-center text-gray-400">No data found</td></tr>
+//               ) : rows.map((row: any) => (
+//                 <tr
+//                   key={row.id}
+//                   onClick={() => onRowClick?.(row)}
+//                   className={`border-t border-gray-100 ${onRowClick ? "cursor-pointer hover:bg-blue-50/50" : "hover:bg-gray-50/50"} ${selected?.id === row.id ? "bg-blue-50 border-l-2 border-l-blue-500" : ""}`}
+//                 >
+//                   {columns.map((col: string) => (
+//                     <td key={col} className="px-4 py-3 text-gray-700">{row[col] || "—"}</td>
+//                   ))}
+//                   <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+//                     <div className="flex gap-2">
+//                       <button onClick={() => onEdit(row)} className="px-3 py-1 text-xs rounded-md bg-amber-200 hover:bg-amber-300">Edit</button>
+//                       {deleteConfirm === row.id ? (
+//                         <>
+//                           <button onClick={() => onDeleteConfirm(row.id)} className="px-3 py-1 text-xs rounded-md text-red-600 hover:bg-green-600 hover:text-white">Confirm</button>
+//                           <button onClick={onDeleteCancel} className="px-3 py-1 text-xs border rounded-md text-gray-500">Cancel</button>
+//                         </>
+//                       ) : (
+//                         <button onClick={() => onDeleteRequest(row.id)} className="px-3 py-1 text-xs rounded-md bg-red-500 hover:bg-red-200 text-white">Delete</button>
+//                       )}
+//                     </div>
+//                   </td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </table>
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
 
-  // =========================
-  // FETCH ROLES
-  // =========================
-  useEffect(() => {
-    if (!isAuth || !token) {
-      setLoading(false);
-      return;
-    }
-    fetchRoles();
-  }, [isAuth, token]);
+// // ── Main component ─────────────────────────────────
+// export default function PositionsTab() {
+//   const { isAuth, token } = useAuthGuard();
 
-  const fetchRoles = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+//   const [categories, setCategories] = useState<any[]>([]);
+//   const [values, setValues] = useState<any[]>([]);
+//   const [selectedCat, setSelectedCat] = useState<any | null>(null);
 
-      const res = await fetch(`${API}/admin/allRoles`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+//   const [catSearch, setCatSearch] = useState("");
+//   const [valSearch, setValSearch] = useState("");
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`${res.status}: ${text}`);
-      }
+//   const [catLoading, setCatLoading] = useState(true);
+//   const [valLoading, setValLoading] = useState(false);
 
-      const data = await res.json();
-      const parsed = data.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        description: item.description ?? ""
-      }));
-      setRoles(parsed);
+//   // Modal state — one object covers both panels
+//   const [modal, setModal] = useState<{ type: "cat" | "val"; mode: "add" | "edit"; data?: any } | null>(null);
+//   const [form, setForm] = useState<Record<string, string>>({});
 
-    } catch (err: any) {
-      toast.error("Fetch error:", err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+//   const [catDeleteConfirm, setCatDeleteConfirm] = useState<string | null>(null);
+//   const [valDeleteConfirm, setValDeleteConfirm] = useState<string | null>(null);
 
-  // =========================
-  // OPEN MODALS
-  // =========================
-  const openAdd = () => {
-    setForm({});
-    setSelected(null);
-    setModal("add");
-  };
+//   const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
 
-  const openEdit = (role: any) => {
-    setSelected(role);
-    setForm({
-      name: role.name,
-      description: role.description,
-    });
-    setModal("edit");
-  };
+//   // =========================
+//   // FETCH
+//   // =========================
+//   useEffect(() => {
+//     if (isAuth && token) fetchCategories();
+//   }, [isAuth, token]);
 
-  // =========================
-  // SAVE (CREATE / UPDATE)
-  // =========================
-  const handleSave = async () => {
-    if (!form.name) return;
+//   const fetchCategories = async () => {
+//     setCatLoading(true);
+//     try {
+//       const res = await fetch(`${API}/admin/all_categories`, { headers });
+//       if (!res.ok) throw new Error(await res.text());
+//       setCategories(await res.json());
+//     } catch (err: any) {
+//       toast.error("Failed to load categories: " + err.message);
+//     } finally {
+//       setCatLoading(false);
+//     }
+//   };
 
-    try {
-      if (modal === "add") {
-        const formdata = {
-          ...form,
-          updatedBy: localStorage.getItem("userID"),
-        }
-        const res = await fetch(`${API}/admin/create_roles`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(formdata),
-        });
+//   const fetchValues = async (categoryId: string) => {
+//     setValLoading(true);
+//     try {
+//       const res = await fetch(`${API}/admin/all_values/${categoryId}`, { headers });
+//       if (!res.ok) throw new Error(await res.text());
+//       const data = await res.json();
+//       setValues(data);
+//       console.log(data);
+//     } catch (err: any) {
+//       const parsed = JSON.parse(err.message);
+//       toast.error("Failed to load values: " + parsed.msg);
+//       console.log(err.message);
+//     } finally {
+//       setValLoading(false);
+//     }
+//   };
 
-        const newRole = await res.json();
-        setRoles((prev) => [...prev, newRole]);
-      }
+//   // =========================
+//   // MODAL HELPERS
+//   // =========================
+//   const openAdd = (type: "cat" | "val") => { setForm({}); setModal({ type, mode: "add" }); };
+//   const openEdit = (type: "cat" | "val", data: any) => { setForm(data); setModal({ type, mode: "edit", data }); };
+//   const closeModal = () => { setModal(null); setForm({}); };
 
-      if (modal === "edit" && selected) {
-        const formdata = {
-          ...form,
-          updatedBy: localStorage.getItem("userID"),
-        }
-        console.log(localStorage.getItem("userID"));
-        const res = await fetch(`${API}/admin/update_Roles/${selected.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(formdata),
-        });        
-      }
+//   // =========================
+//   // SAVE
+//   // =========================
+//   const handleSave = async () => {
+//     if (!modal) return;
+//     const isCat = modal.type === "cat";
+//     const isEdit = modal.mode === "edit";
 
-      await fetchRoles();
-      setModal(null);
-      setSelected(null);
-      setForm({});
-    } catch (err) {
-      toast.error("Save error:" + err);
-    }
-  };
+//     const url = isCat
+//       ? isEdit ? `${API}/admin/update_category/${modal.data?.id}` : `${API}/admin/create_category`
+//       : isEdit ? `${API}/admin/update_value/${modal.data?.id}` : `${API}/admin/create_value`;
 
-  // =========================
-  // DELETE ROLE
-  // =========================
-const handleDelete = async (id: string) => {
-  try {
-    const res = await fetch(`${API}/admin/delete_Roles/${id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+//     const body = isCat ? form : { ...form, categoryId: selectedCat?.id };
 
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(text || "Failed to delete role");
-    }
+//     try {
+//       const res = await fetch(url, {
+//         method: isEdit ? "PUT" : "POST",
+//         headers,
+//         body: JSON.stringify(body),
+//       });
+//       if (!res.ok) throw new Error(await res.text());
+//       const data = await res.json();
+//       toast.success(data.msg);
+//       isCat ? fetchCategories() : fetchValues(selectedCat?.id);
+//       closeModal();
+//     } catch (err) {
+//       toast.error("Save failed: " + err);
+//     }
+//   };
 
-    const text = await res.text();
-    const data = text ? JSON.parse(text) : null;
-    toast.success(data.msg); 
-    await fetchRoles();
-    setDeleteConfirm(null);
-  } catch (err) {
-    toast.error("Delete error: " + err);
-  }
-};
+//   // =========================
+//   // DELETE
+//   // =========================
+//   const handleDelete = async (type: "cat" | "val", id: string) => {
+//     console.log(id);
+//     const url = type === "cat"
+//       ? `${API}/admin/delete_category/${id}`
+//       : `${API}/admin/delete_value/${id}`;
+//     try {
+//       const res = await fetch(url, { method: "DELETE", headers });
+//       if (!res.ok) throw new Error(await res.text());
+//       toast.success("Deleted successfully");
+//       if (type === "cat") {
+//         if (selectedCat?.id === id) { setSelectedCat(null); setValues([]); }
+//         fetchCategories();
+//         setCatDeleteConfirm(null);
+//       } else {
+//         fetchValues(selectedCat?.id);
+//         setValDeleteConfirm(null);
+//       }
+//     } catch (err) {
+//       toast.error("Delete failed: " + err);
+//     }
+//   };
 
-  // =========================
-  // FILTERED DATA
-  // =========================
-  const filtered = roles.filter((r) =>
-    r.name?.toLowerCase().includes(search.toLowerCase())
-  );
+//   // =========================
+//   // FILTERED ROWS
+//   // =========================
+//   const filteredCats = categories.filter((c) =>
+//     c.code?.toLowerCase().includes(catSearch.toLowerCase())
+//   );
+//   const filteredVals = values.filter((v) =>
+//     (v.code || "").toLowerCase().includes(valSearch.toLowerCase())
+//   );
 
-  // =========================
-  // RENDER STATES
-  // =========================
-  if (loading) {
-    return <div className="p-4 text-gray-500">Loading roles...</div>;
-  }
+//   return (
+//     <div className="flex gap-6">
 
-  if (error) {
-    return (
-      <div className="p-4 text-red-500 flex items-center gap-2">
-        <span>⚠ {error}</span>
-        <button
-          onClick={fetchRoles}
-          className="ml-2 px-3 py-1 text-xs border border-red-300 rounded-md text-red-500 hover:bg-red-50"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
+//       {/* CATEGORIES */}
+//       <DataTable
+//         columns={["code", "label", "description"]}
+//         rows={filteredCats}
+//         selected={selectedCat}
+//         onRowClick={(cat: any) => { setSelectedCat(cat); setValues([]); setValSearch(""); fetchValues(cat.id); }}
+//         search={catSearch}
+//         onSearch={setCatSearch}
+//         onAdd={() => openAdd("cat")}
+//         addLabel="+ Add Category"
+//         loading={catLoading}
+//         deleteConfirm={catDeleteConfirm}
+//         onEdit={(row: any) => openEdit("cat", { code: row.code, label: row.label, description: row.description, id: row.id })}
+//         onDeleteRequest={setCatDeleteConfirm}
+//         onDeleteConfirm={(id: string) => handleDelete("cat", id)}
+//         onDeleteCancel={() => setCatDeleteConfirm(null)}
+//       />
 
-  return (
-    <div>
-      {/* TOP BAR */}
-      <div className="flex justify-between items-center mb-4">
-        <input
-          type="text"
-          placeholder="Search roles..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 w-56 focus:outline-none focus:ring-1 focus:ring-gray-400"
-        />
-
-        <button
-          onClick={openAdd}
-          className="px-4 py-2 text-sm font-medium bg-gray-900 text-white rounded-lg hover:bg-gray-800"
-        >
-          + Add role
-        </button>
-      </div>
-
-      {/* TABLE */}
-      <div className="border border-gray-200 rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">
-                Name
-              </th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">
-                Description
-              </th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">
-                Actions
-              </th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filtered.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={3}
-                  className="px-4 py-8 text-center text-gray-400"
-                >
-                  No roles found
-                </td>
-              </tr>
-            ) : (
-              filtered.map((role) => (
-                <tr
-                  key={role.id}
-                  className="border-t border-gray-100 hover:bg-gray-50/50"
-                >
-                  <td className="px-4 py-3 font-medium text-gray-900">
-                    {role.name}
-                  </td>
-
-                  <td className="px-4 py-3 text-gray-500">
-                    {role.description || "—"}
-                  </td>
-
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => openEdit(role)}
-                        className="px-3 py-1 text-m  rounded-md hover:bg-gray-50 text-black bg-amber-200"
-                      >
-                        Edit
-                      </button>
-
-                      {deleteConfirm === role.id ? (
-                        <>
-                          <button
-                            onClick={() => handleDelete(role.id)}
-                            className="px-3 py-1 text-m  border-red-900 rounded-md text-red-600 hover:bg-green-600 hover:text-amber-50 "
-                          >
-                            Confirm
-                          </button>
-                          <button
-                            onClick={() => setDeleteConfirm(null)}
-                            className="px-3 py-1 text-xs border rounded-md text-gray-500 hover:text-gray-800"
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      ) : (
-                        <button
-                          onClick={() => setDeleteConfirm(role.id)}
-                          className="px-3 py-1 text-m border border-red-100 rounded-md bg-red-500 hover:bg-red-200 hover:text-black text-amber-50"
-                        >
-                          Delete
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* MODAL */}
-      {modal && (
-        <EntityModal
-          title="role"
-          fields={FIELDS}
-          values={form}
-          onChange={(name, val) =>
-            setForm((prev) => ({ ...prev, [name]: val }))
-          }
-          onSave={handleSave}
-          onClose={() => setModal(null)}
-          isEdit={modal === "edit"}
-        />
-      )}
-    </div>
-  );
-}
+//       {/* SINGLE MODAL for both */}
+//       {modal && (
+//         <EntityModal
+//           title={modal.type === "cat" ? "category" : "lookup value"}
+//           fields={modal.type === "cat" ? POSITIONS_FIELDS: }
+//           values={form}
+//           onChange={(name: string, val: string) => setForm((prev) => ({ ...prev, [name]: val }))}
+//           onSave={handleSave}
+//           onClose={closeModal}
+//           isEdit={modal.mode === "edit"}
+//         />
+//       )}
+//     </div>
+//   );
+// }
